@@ -53,12 +53,12 @@
 // V10_3_4 Try to solve the Fix position Function
 //  
 // V10_3_5 Sorry, changes commented in Spanish ;)
-// Luego que mueva Black, hago el extra movimiento sin verificacion previa (Poner FIXUP_POSITION =0; si no se necesita el movimiento extra) 
-// El Movimiento Extra se puede necesitar porque el Electroiman, aunque este centrado debajo del casillero, deje a la pieza unos mm desfasada 
-// (Y no pudo corregirse ese desfase, ni con aumentando el PWM del Electroiman, ni acercando el acrilico fisicamente)
+// After Black moves, perform the extra movement without prior verification (Set FIXUP_POSITION = 0 if the extra movement is not needed) 
+// The extra movement may be necessary because the electromagnet, even when centered under the square, may leave the piece a few millimeters off-center 
+// (And this offset could not be corrected, neither by increasing the PWM of the electromagnet nor by physically moving the acrylic closer)
 // 
-// Se agrega la inicializacion de las matrices - by Ethan Khoo (EK) October 2024
-// Se agregan 2 Variables en Global (Global V8) para contar el numero de piezas en Micromax y en los Sensores
+// Added matrix initialization - by Ethan Khoo (EK) October 2024
+// Added 2 global variables (Global V8) to count the number of pieces in Micromax and in the sensors
 //
 // Have 2 Issues
 // Issue 1: Multiple Detections on the First Press (False Positives)
@@ -66,7 +66,7 @@
 // Both Solved by EK
 //
 // V10_3_6 again comments in spanish
-// Cuando la pieza negra va a comer la blanca, el trolley parece:
+// When the black piece is about to capture the white one, the trolley seems to:
 // It would "forget" to move to where the white piece is at and just start the eating function where it was located.
 //
 // Detected Limitations not implemented yet ************
@@ -209,7 +209,7 @@ void loop() {
           }
           else {
           lcd_display();
-          // Fue a not valid move - se corrigio a mano el tablero - puede continuar el juego
+          // Went to not valid move - the board was manually corrected - the game can continue
           new_turn_countdown = true; // V10.3.5
           sequence = player_black;    // V10.3.5
           }
@@ -241,7 +241,7 @@ void loop() {
               }
             else {
               lcd_display();
-              // Fue a not valid move - se corrigio a mano el tablero - puede continuar el juego
+              // Went to not valid move - the board was manually corrected - the game can continue
               new_turn_countdown = true; // V10.3.5
               sequence = player_white;    // V10.3.5
               }
@@ -257,7 +257,7 @@ void loop() {
           // Verifico si la cantidad de piezas en el tablero es correcta, pues puede ser que un sensor no la haya leido // V10.3.5
           if (Pieces_on_board() == false ){  // Cuento la cantidad de Piezas en el Tablero, si no son las esperadas=false. 
               
-                Set_The_Board();                  // Si es false -> solucion manual
+                Set_The_Board();                  // If false -> manual solution
             }
           
           //  Set the new status of the hall sensors
@@ -731,7 +731,7 @@ void lcd_display() {
     lcd.setCursor(0, 1);
     lcd.print("                ");
     delay(500);  // V10.2
-    Set_The_Board();          // V10.3.5        // Si es false -> solucion manual
+    Set_The_Board();          // V10.3.5        // If false -> manual solution
     no_valid_move = false;
     return;
   }
@@ -812,12 +812,12 @@ void Read_Sensor (HC4067 &mux)
   //  Read the hall sensor status
  
   multiplex = 0;
-  mux.disable(); // Deshabilita todos los mux
+  mux.disable(); // Disable all muxes
 
-// Activa el mux llamado como parámetro
+// Activate the mux passed as parameter
   mux.enable();
 
-// Establece las columnas y filas según el mux
+// Set columns and rows according to the mux
   if (&mux == &mux1) {
     column = 0;
     row = 0;
@@ -831,10 +831,10 @@ void Read_Sensor (HC4067 &mux)
     column = 0;
     row = 6;
   }
- // Lee los valores del sensor para el mux activado
+ // Read the sensor values for the activated mux
   read_hall_values(mux);
 
-  // Deshabilita el mux después de la lectura
+  // Disable the mux after reading
   mux.disable();
 
   
@@ -846,7 +846,7 @@ void read_hall_values(HC4067 &mux) {
     mux.setChannel(j);
     hallMeasure = analogRead(Mux_Out);
     delay(5);
-    Record_hall_measure(); // Graba el valor del sensor activado
+    Record_hall_measure(); // Record the value of the activated sensor
     column++;
     if (column > 7) {
       column = 0;
@@ -857,13 +857,13 @@ void read_hall_values(HC4067 &mux) {
 
 void Record_hall_measure() {
   if (hallMeasure <= hall_min) {
-    hall_sensor_status[row][7-column] = -1;    // revisa la polaridad de tus imanes. Aqui defini las blancas (-1)
+    hall_sensor_status[row][7-column] = -1;    // Check the polarity of your magnets. Here I defined white pieces as (-1)
     hall_value[row][7-column] = hallMeasure;
   } else if (hallMeasure > hall_max) {
-    hall_sensor_status[row][7-column] = 1;   // revisa la polaridad de tus imanes. Aqui defini las negras (1)
+    hall_sensor_status[row][7-column] = 1;   // Check the polarity of your magnets. Here I defined black pieces as (1)
     hall_value[row][7-column] = hallMeasure;
   } else {
-    hall_sensor_status[row][7-column] = 0;    // revisa la polaridad de tus imanes. Aqui defini que no hay pieza
+    hall_sensor_status[row][7-column] = 0;    // Check the polarity of your magnets. Here I defined that there is no piece
     hall_value[row][7-column] = hallMeasure;
   }
 }
@@ -877,7 +877,7 @@ number_sensor_change=0;  // V9.2.7.2
   {
     for (byte j = 0; j < 8; j++) 
     {
-      if (abs(hall_sensor_status[i][j]) != abs(hall_sensor_status_memory[i][j])) // En valor Absoluto, indistinto B&N 
+      if (abs(hall_sensor_status[i][j]) != abs(hall_sensor_status_memory[i][j])) // In absolute value, regardless of B&N 
       { 
         number_sensor_change++;
 
@@ -888,7 +888,7 @@ number_sensor_change=0;  // V9.2.7.2
   switch (number_sensor_change){
  
   case 1:
-    // 1 Cambio en valor absoluto. única opcion se quita 1 pieza del tablero -> situacion comer normal
+    // 1 change in absolute value. Only option: 1 piece is removed from the board -> normal capture situation
 
     for (byte i = 0; i < 8; i++) 
     {
@@ -912,7 +912,7 @@ number_sensor_change=0;  // V9.2.7.2
     break;
 
   case 2:
-    // 2 cambios en valor absoluto. unica opcion-> una pieza se mueve del tablero a una casilla vacia-> mover pieza
+    // 2 changes in absolute value. Only option: a piece moves from the board to an empty square -> move piece
 
     for (byte i = 0; i < 8; i++) 
     {
@@ -938,7 +938,7 @@ number_sensor_change=0;  // V9.2.7.2
     break;
 
   case 3:
-    // 3 cambios en valor absoluto. unica opcion -> 1 pieza se quita del tablero y 1 pieza se mueve a casilla vacia-> Situacion Comer al Paso
+    // 3 changes in absolute value. Only option: 1 piece is removed from the board and 1 piece moves to an empty square -> En Passant situation
     
    for (byte i = 0; i < 8; i++) 
     {
@@ -962,13 +962,13 @@ number_sensor_change=0;  // V9.2.7.2
     break;
 
   case 4:
-    // 4 cambios en valor Absoluto. unica opcion -> 2 piezas se mueven a casillas vacias -> Situacion Enroque
-    // Si Torre a1 se movio entonces enroque lado dama. Si no, Enroque lado Rey.
-    // Siempre sale del Rey, e1. Puede ir al c1 (lado dama) o al g1(lado Rey)
+    // 4 changes in absolute value. Only option: 2 pieces move to empty squares -> Castling situation
+    // If the rook at a1 moved, then it's queenside castling. If not, kingside castling.
+    // Always starts from the king, e1. It can go to c1 (queenside) or g1 (kingside)
     hall_colone[0] = 0; 
     hall_line[0] = 4; 
 
-    if (hall_sensor_status[0][0] != hall_sensor_status_memory[0][0]) // verifico casilla a1
+    if (hall_sensor_status[0][0] != hall_sensor_status_memory[0][0]) // Check square a1
     {
           hall_colone[1] = 0; 
           hall_line[1] = 2;    
@@ -982,7 +982,7 @@ number_sensor_change=0;  // V9.2.7.2
     break;
 
   default:
-    // Cualquier otro valor de cambio de sensores en valor absoluto(0, o mayor que 4), error
+    // Any other value of sensor change in absolute value (0, or greater than 4), error
     break;
 
   }
@@ -1063,9 +1063,9 @@ void player_displacement() {
 
 // **************************  Set the Board manualy if Bad Move and can't fix automatic
 // V10.3.5
-void Set_The_Board(){ // modificar para que resalte en la matriz led y en el serial los casilleros a corregir
+void Set_The_Board(){ // modify to highlight on the LED matrix and in the serial the squares to correct
   Serial.println("Set_The_Board called");
-	// Place manualy the pieces on place as on the Last move, before the "Bad Move" appears
+	// Manually place the pieces as they were in the last move, before the "Bad Move" occurred
 	lcd.setCursor(0, 0);
     lcd.print("PUT PIECES AS   ");
     lcd.setCursor(0, 1);
