@@ -17,26 +17,30 @@ Lưu ý:
 - Đảm bảo cảm biến và IC dùng chung mức điện áp (3.3V hoặc 5V).
 ===============================================================================
 */
+
+// Đo ngưỡng: 947 - nguong 1850 -  [1930 - nguong 2050 - 3070
+
 #include "HC4067.h"
 
-const byte S0 = 15;
-const byte S1 = 2;
-const byte S2 = 4;
-const byte S3 = 16;
+const byte S0 = 19;
+const byte S1 = 18;
+const byte S2 = 5;
+const byte S3 = 17;
 const int Mux_Out = 36; // GPIO36 = VP = ADC1_CH0
+const byte EN = 22;     // Chân EN của MUX
 
-HC4067 mux1(S0, S1, S2, S3, 22); // Chân 22 có thể dùng làm SIG nếu bạn cần, hoặc bỏ qua nếu không dùng
+HC4067 mux1(S0, S1, S2, S3, EN); // Truyền EN vào hàm khởi tạo
 
 void setup() {
-  Serial.begin(115200); // ESP32 thường dùng baud cao hơn
+  Serial.begin(115200);
 }
 
 void loop() {
-  mux1.enable();
+  mux1.enable();           // Bật MUX
   mux1.setChannel(0);
   delay(5);
   int hallMeasure = analogRead(Mux_Out);
-  mux1.disable();
+  mux1.disable();          // Tắt MUX
 
   Serial.print("Hall sensor value (mux1, channel 0): ");
   Serial.println(hallMeasure);
